@@ -13,7 +13,7 @@ out vec2 v_Text;
 out vec4 v_Color;
 
 void main() {
-    gl_Position = projectMatrix*viewMatrix*modelMatrix*aPos;//projectMatrix*viewMatrix*modelMatrix*aPos;
+    gl_Position =  projectMatrix * viewMatrix *modelMatrix*aPos;//
     v_Text = aText;
     v_Color = aColor;
 }

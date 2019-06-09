@@ -27,6 +27,7 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
     protected int vertexShaderID = 0, fragmentShaderID = 0, program = 0, textureID = 0;
 
     final float[] position = {
+
             //front
             -0.5f,0.5f,0.5f,    1.0f,0.0f,0.0f,1.0f,
             0.5f,0.5f,0.5f,     1.0f,0.0f,0.0f,1.0f,
@@ -34,10 +35,10 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
             0.5f, -0.5f, 0.5f,  0.3f,0.0f,0.0f,1.0f,
 
             //back
-            -0.5f,0.5f,-0.5f,    0.0f,1.0f,0.0f,1.0f,
-            0.5f,0.5f,-0.5f,     0.0f,1.0f,0.0f,1.0f,
-            -0.5f, -0.5f,-0.5f,  0.0f,0.3f,0.0f,1.0f,
-            0.5f, -0.5f, -0.5f,  0.0f,0.3f,0.0f,1.0f,
+            -0.5f,0.7f,-0.5f,    0.0f,1.0f,0.0f,1.0f,
+            0.5f,0.7f,-0.5f,     0.0f,1.0f,0.0f,1.0f,
+            -0.5f, -0.3f,-0.5f,  0.0f,0.3f,0.0f,1.0f,
+            0.5f, -0.3f, -0.5f,  0.0f,0.3f,0.0f,1.0f,
 
             //right
             0.5f,-0.5f, 0.5f,   0.0f,0.0f,0.3f,1.0f,
@@ -68,6 +69,8 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
     private float[] modelMatrix = new float[16];
     private float[] projectMatrix = new float[16];
     private float[] viewMatrix = new float[16];
+    private long startTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,15 +82,10 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
         mGLSurfaceView.setRenderer(this);
         mGLSurfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
         mGLSurfaceView.getHolder().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
-
-        Matrix.setIdentityM(modelMatrix, 0);
-        Matrix.scaleM(modelMatrix, 0, 0.5f, 0.5f,-0.5f);
-        Matrix.translateM(modelMatrix,0,0,0,0.5f);
-        Matrix.rotateM(modelMatrix,0, 30,1,0,0);
-        Matrix.rotateM(modelMatrix,0, -240,0,1,0);//顺序:先乘后做--VerTr = M * Mr45 * Mr30 * Vert
+        startTime = System.currentTimeMillis();
 
         Matrix.setIdentityM(viewMatrix, 0);
-        Matrix.setLookAtM(viewMatrix,0, 0, 0, 1.0f, 0, 0, 0, 0,1.0f,0);
+        Matrix.setLookAtM(viewMatrix,0, 0, 0, -10.0f, 0, 0, 0, 0,1.0f,0);
 
 //        需要注意的是 near 和 far 变量的值必须要大于 0 。因为它们都是相对于视点的距离，也就是照相机的距离。
 //        当用视图矩阵确定了照相机的位置时，要确保物体距离视点的位置在 near 和 far 的区间范围内，否则就会看不到物体。
@@ -98,9 +96,11 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
         //左右前后值计算的是它们的比例关系，所以无所谓坐标单位。
         //在其它值不变，near越小镜头越广，物体投影越小；同理，宽高相对near越大，镜头越广，物体投影越小。
         //far值不会影响镜头广度，只是有包含的物体范围，过近的话远方物体会被“切掉”
-//        Matrix.frustumM(projectMatrix, 0, -1.0f, 1.0f,-1.0f,1.0f,1.0f, 1000f);
-        float ratio = (float) 720 / 1280;
-        Matrix.perspectiveM(projectMatrix, 0, 60f, 1,  0.01f, 1000f);
+//        Matrix.frustumM(projectMatrix, 0, -1.0f, 1.0f,-1.0f,1.0f,5.0f, 1000f);
+
+        //perspectiveM函数里面角度已经固定，near不会影响投影物体大小，near far只控制了范围，所以如果near值过大，
+        //物体会从近处被切掉
+        Matrix.perspectiveM(projectMatrix, 0, 40f, 1,  10f, 1000f);
     }
 
     @Override
@@ -149,6 +149,13 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
         GLES30.glClearColor(0.4f,0.4f,0.4f,1.0f);
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
         GLES30.glViewport(0,0,1024,1024);
+
+        Matrix.setIdentityM(modelMatrix, 0);
+//        Matrix.scaleM(modelMatrix, 0, 0.5f, 0.5f,0.5f);
+//        Matrix.translateM(modelMatrix,0,0,0,0.5f);
+//        Matrix.rotateM(modelMatrix,0, 30,1,0,0);
+
+        Matrix.rotateM(modelMatrix,0, (System.currentTimeMillis()-startTime)/100%360,0,1,0);//顺序:先乘后做--VerTr = M * Mr45 * Mr30 * Vert
 
         GLES30.glUseProgram(program);
 
