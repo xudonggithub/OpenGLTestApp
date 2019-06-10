@@ -28,19 +28,19 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
 
     final float[] position = {
 
-            //front
+            //front red
             -0.5f,0.5f,0.5f,    1.0f,0.0f,0.0f,1.0f,
             0.5f,0.5f,0.5f,     1.0f,0.0f,0.0f,1.0f,
             -0.5f, -0.5f,0.5f,  0.3f,0.0f,0.0f,1.0f,
             0.5f, -0.5f, 0.5f,  0.3f,0.0f,0.0f,1.0f,
 
-            //back
+            //back green
             -0.5f,0.7f,-0.5f,    0.0f,1.0f,0.0f,1.0f,
             0.5f,0.7f,-0.5f,     0.0f,1.0f,0.0f,1.0f,
             -0.5f, -0.3f,-0.5f,  0.0f,0.3f,0.0f,1.0f,
             0.5f, -0.3f, -0.5f,  0.0f,0.3f,0.0f,1.0f,
 
-            //right
+            //right blue
             0.5f,-0.5f, 0.5f,   0.0f,0.0f,0.3f,1.0f,
             0.5f,-0.5f, -0.5f,  0.0f,0.0f,0.3f,1.0f,
             0.5f, 0.5f, 0.5f,   0.0f,0.0f,1.0f,1.0f,
@@ -66,11 +66,19 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
 
     final FloatBuffer posFloatBuf = getGLBuffer(position);//java和opengl有大小头区别，记得native order
     final FloatBuffer textFloatBuf = getGLBuffer(texture);
-    private float[] modelMatrix = new float[16];
-    private float[] projectMatrix = new float[16];
-    private float[] viewMatrix = new float[16];
+    protected float[] modelMatrix = new float[16];
+    protected float[] projectMatrix = new float[16];
+    protected float[] viewMatrix = new float[16];
     private long startTime;
+    private int vertexShaderRawID = R.raw.base_vertex_shader;
+    private int fragmentShaderRawID = R.raw.base_fragment_shader;
 
+    public void setVertexShaderRawID(int id){
+        vertexShaderRawID = id;
+    }
+    public void setFragmentShaderRawID(int id){
+        fragmentShaderRawID = id;
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,8 +92,14 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
         mGLSurfaceView.getHolder().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
         startTime = System.currentTimeMillis();
 
+//        Matrix.setIdentityM(modelMatrix, 0);
+//        Matrix.scaleM(modelMatrix, 0, 0.5f, 0.5f,0.5f);
+//        Matrix.translateM(modelMatrix,0,0,0,0.5f);
+//        Matrix.rotateM(modelMatrix,0, 30,1,0,0);
+
+
         Matrix.setIdentityM(viewMatrix, 0);
-        Matrix.setLookAtM(viewMatrix,0, 0, 0, -10.0f, 0, 0, 0, 0,1.0f,0);
+        Matrix.setLookAtM(viewMatrix,0, 0, 0, 10.0f, 0, 0, 0, 0,1.0f,0);
 
 //        需要注意的是 near 和 far 变量的值必须要大于 0 。因为它们都是相对于视点的距离，也就是照相机的距离。
 //        当用视图矩阵确定了照相机的位置时，要确保物体距离视点的位置在 near 和 far 的区间范围内，否则就会看不到物体。
@@ -100,20 +114,20 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
 
         //perspectiveM函数里面角度已经固定，near不会影响投影物体大小，near far只控制了范围，所以如果near值过大，
         //物体会从近处被切掉
-        Matrix.perspectiveM(projectMatrix, 0, 40f, 1,  10f, 1000f);
+        Matrix.perspectiveM(projectMatrix, 0, 40f, 1,  1f, 1000f);
     }
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
 
         vertexShaderID = GLES30.glCreateShader(GLES30.GL_VERTEX_SHADER);
-        String vertexShader = TextResourceReader.readTextFileFromResource(this, R.raw.base_vertex_shader);
+        String vertexShader = TextResourceReader.readTextFileFromResource(this, vertexShaderRawID);
         Log.d(TAG, vertexShader);
         GLES30.glShaderSource(vertexShaderID, vertexShader);
         GLES30.glCompileShader(vertexShaderID);
         fragmentShaderID = GLES30.glCreateShader(GLES30.GL_FRAGMENT_SHADER);
 
-        String fragmentShader = TextResourceReader.readTextFileFromResource(this, R.raw.base_fragment_shader);
+        String fragmentShader = TextResourceReader.readTextFileFromResource(this, fragmentShaderRawID);
         Log.d(TAG, fragmentShader);
         GLES30.glShaderSource(fragmentShaderID, fragmentShader);
         GLES30.glCompileShader(fragmentShaderID);
@@ -138,6 +152,8 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
 
     }
 
+
+
     @Override
     public void onSurfaceChanged(GL10 gl10, int i, int i1) {
 
@@ -153,9 +169,9 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
         Matrix.setIdentityM(modelMatrix, 0);
 //        Matrix.scaleM(modelMatrix, 0, 0.5f, 0.5f,0.5f);
 //        Matrix.translateM(modelMatrix,0,0,0,0.5f);
-//        Matrix.rotateM(modelMatrix,0, 30,1,0,0);
-
-        Matrix.rotateM(modelMatrix,0, (System.currentTimeMillis()-startTime)/100%360,0,1,0);//顺序:先乘后做--VerTr = M * Mr45 * Mr30 * Vert
+        Matrix.rotateM(modelMatrix,0, 30,1,0,0);
+        //旋转方向：正轴指向自己时逆时针
+        Matrix.rotateM(modelMatrix,0, (System.currentTimeMillis()-startTime)/50%360,0,0,1);//顺序:先乘后做--VerTr = M * Mr45 * Mr30 * Vert
 
         GLES30.glUseProgram(program);
 
@@ -244,7 +260,7 @@ private void checkError(String msg){
         return textureID;
     }
 
-    private static  FloatBuffer getGLBuffer(float[] srcByte){
+    public static  FloatBuffer getGLBuffer(float[] srcByte){
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4*srcByte.length);
         byteBuffer.order(ByteOrder.nativeOrder());
         FloatBuffer floatBuffer = byteBuffer.asFloatBuffer();

@@ -45,9 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(usedPermissions.length>0) {
             ActivityCompat.requestPermissions(this, usedPermissions, INIT_PERMISSION);
         } else{
-            Intent intent=new Intent(this,BaseRenderActivity.class);
-            startActivity(intent);
-            finish();
+            startActivity();
             return;
         }
     }
@@ -63,9 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         return;
                     }
                 }
-                Intent intent=new Intent(this,BaseRenderActivity.class);
-                startActivity(intent);
-                finish();
+                startActivity();
                 return;
             }
         }
@@ -90,10 +86,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.base_texture:
-                Intent intent=new Intent(this,BaseRenderActivity.class);
-                startActivity(intent);
-                finish();
+                startActivity();
                 break;
         }
+    }
+
+    private void startActivity(){
+        Intent intent=new Intent(this, CubeRenderActivity.class);
+        startActivity(intent);
+        finish();
     }
 }
