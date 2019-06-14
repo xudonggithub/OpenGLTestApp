@@ -21,6 +21,7 @@
         </activity>
         <activity android:name=".BaseRenderActivity"/>
         <activity android:name=".CubeRenderActivity"/>
+        <activity android:name=".LightShadowRenderActivity"/>
     </application>
 
 </manifest>

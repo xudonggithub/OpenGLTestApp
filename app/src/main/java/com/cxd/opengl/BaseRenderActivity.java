@@ -1,12 +1,12 @@
 package com.cxd.opengl;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -21,12 +21,16 @@ import java.nio.FloatBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceView.Renderer{
+public class BaseRenderActivity extends Activity implements GLSurfaceView.Renderer{
     protected String TAG = "CXDRender";
     protected GLSurfaceView mGLSurfaceView;
-    protected int vertexShaderID = 0, fragmentShaderID = 0, program = 0, textureID = 0;
-
-    final float[] position = {
+    protected float[] fbMatrix = {
+            1.0f, 0, 0 ,0,
+            0, -1.0f,0, 0,
+            0, 0, 1.0f, 0,
+            0, 0, 0, 1.0f
+    };
+    private final float[] position = {
 
             //front red
             -0.5f,0.5f,0.5f,    1.0f,0.0f,0.0f,1.0f,
@@ -47,7 +51,7 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
             0.5f, 0.5f, -0.5f,  0.0f,0.0f,1.0f,1.0f,
     };
 
-    final float[] texture = {//个数与上面的vertex一致，不然后面的会黑
+    private  final float[] texture = {//个数与上面的vertex一致，不然后面的会黑
             0.0f,0.0f,
             1.0f, 0.0f,
             0.0f,1.0f,
@@ -63,22 +67,21 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
             0.0f,1.0f,
             1.0f, 1.0f,
              };
-
-    final FloatBuffer posFloatBuf = getGLBuffer(position);//java和opengl有大小头区别，记得native order
-    final FloatBuffer textFloatBuf = getGLBuffer(texture);
+    protected int vertexShaderID = 0, fragmentShaderID = 0, program = 0, textureID = 0;
+    private final FloatBuffer posFloatBuf = getGLBuffer(position);//java和opengl有大小头区别，记得native order
+    private final FloatBuffer textFloatBuf = getGLBuffer(texture);
     protected float[] modelMatrix = new float[16];
     protected float[] projectMatrix = new float[16];
     protected float[] viewMatrix = new float[16];
-    private long startTime;
+    protected long startTime;
     private int vertexShaderRawID = R.raw.base_vertex_shader;
     private int fragmentShaderRawID = R.raw.base_fragment_shader;
 
-    public void setVertexShaderRawID(int id){
-        vertexShaderRawID = id;
+    public void setShaderRawID(int vertexShaderID, int fragmentShaderID){
+        vertexShaderRawID = vertexShaderID;
+        fragmentShaderRawID = fragmentShaderID;
     }
-    public void setFragmentShaderRawID(int id){
-        fragmentShaderRawID = id;
-    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,11 +95,25 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
         mGLSurfaceView.getHolder().setFormat(android.graphics.PixelFormat.TRANSLUCENT);
         startTime = System.currentTimeMillis();
 
+    }
+
+    @Override
+    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
+        vertexShaderID = createShader(GLES30.GL_VERTEX_SHADER, vertexShaderRawID);
+        fragmentShaderID = createShader(GLES30.GL_FRAGMENT_SHADER, fragmentShaderRawID);
+        program = createProgram(vertexShaderID, fragmentShaderID);
+
+        Bitmap bitmap = BitmapUtil.decodeResource(this, R.raw.tex_0);
+        ByteBuffer byteBuffer = BitmapUtil.getByteBuffer(bitmap);
+        byteBuffer.position(0);
+        textureID = createImageTexture(byteBuffer, bitmap.getWidth(), bitmap.getHeight());
+        bitmap.recycle();
+
+
 //        Matrix.setIdentityM(modelMatrix, 0);
 //        Matrix.scaleM(modelMatrix, 0, 0.5f, 0.5f,0.5f);
 //        Matrix.translateM(modelMatrix,0,0,0,0.5f);
 //        Matrix.rotateM(modelMatrix,0, 30,1,0,0);
-
 
         Matrix.setIdentityM(viewMatrix, 0);
         Matrix.setLookAtM(viewMatrix,0, 0, 0, 10.0f, 0, 0, 0, 0,1.0f,0);
@@ -115,41 +132,6 @@ public class BaseRenderActivity extends AppCompatActivity implements GLSurfaceVi
         //perspectiveM函数里面角度已经固定，near不会影响投影物体大小，near far只控制了范围，所以如果near值过大，
         //物体会从近处被切掉
         Matrix.perspectiveM(projectMatrix, 0, 40f, 1,  1f, 1000f);
-    }
-
-    @Override
-    public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-
-        vertexShaderID = GLES30.glCreateShader(GLES30.GL_VERTEX_SHADER);
-        String vertexShader = TextResourceReader.readTextFileFromResource(this, vertexShaderRawID);
-        Log.d(TAG, vertexShader);
-        GLES30.glShaderSource(vertexShaderID, vertexShader);
-        GLES30.glCompileShader(vertexShaderID);
-        fragmentShaderID = GLES30.glCreateShader(GLES30.GL_FRAGMENT_SHADER);
-
-        String fragmentShader = TextResourceReader.readTextFileFromResource(this, fragmentShaderRawID);
-        Log.d(TAG, fragmentShader);
-        GLES30.glShaderSource(fragmentShaderID, fragmentShader);
-        GLES30.glCompileShader(fragmentShaderID);
-        program = GLES30.glCreateProgram();
-        GLES30.glAttachShader(program, vertexShaderID);
-        GLES30.glAttachShader(program, fragmentShaderID);
-        GLES30.glLinkProgram(program);
-        int[] linkStatus = new int[1];
-        GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0);
-        if (linkStatus[0] != GLES20.GL_TRUE) {
-            Log.e(TAG, "Could not link program: ");
-            Log.e(TAG, GLES20.glGetProgramInfoLog(program));
-            GLES20.glDeleteProgram(program);
-            program = 0;
-        }
-
-        Bitmap bitmap = BitmapUtil.decodeResource(this, R.raw.tex_0);
-        ByteBuffer byteBuffer = BitmapUtil.getByteBuffer(bitmap);
-        byteBuffer.position(0);
-        textureID = createImageTexture(byteBuffer, bitmap.getWidth(), bitmap.getHeight());
-        bitmap.recycle();
-
     }
 
 
@@ -257,6 +239,7 @@ private void checkError(String msg){
 
         GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, /*level*/ 0, GLES20.GL_RGBA, width, height, /*border*/ 0, GLES20.GL_RGBA, GLES20.GL_UNSIGNED_BYTE, data);
 
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
         return textureID;
     }
 
@@ -267,5 +250,31 @@ private void checkError(String msg){
         floatBuffer.put(srcByte);
         byteBuffer.position(0);
         return floatBuffer;
+    }
+
+    public int createShader(int shaderType, int shaderRawID)
+    {
+        int shaderID = GLES30.glCreateShader(shaderType);
+        String vertexShader = TextResourceReader.readTextFileFromResource(this, shaderRawID);
+        Log.d(TAG, vertexShader);
+        GLES30.glShaderSource(shaderID, vertexShader);
+        GLES30.glCompileShader(shaderID);
+        return shaderID;
+    }
+
+    public int createProgram(int vertexShaderID, int fragmentShaderID){
+        int program = GLES30.glCreateProgram();
+        GLES30.glAttachShader(program, vertexShaderID);
+        GLES30.glAttachShader(program, fragmentShaderID);
+        GLES30.glLinkProgram(program);
+        int[] linkStatus = new int[1];
+        GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0);
+        if (linkStatus[0] != GLES20.GL_TRUE) {
+            Log.e(TAG, "Could not link program: ");
+            Log.e(TAG, GLES20.glGetProgramInfoLog(program));
+            GLES20.glDeleteProgram(program);
+            program = 0;
+        }
+        return program;
     }
 }

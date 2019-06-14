@@ -3,12 +3,12 @@ package com.cxd.opengl;
 import android.opengl.GLES30;
 import android.opengl.Matrix;
 
+import java.nio.FloatBuffer;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class CubeRenderActivity extends BaseRenderActivity {
-    private long startTime;
-
 
     final float[] position = {
 
@@ -31,6 +31,7 @@ public class CubeRenderActivity extends BaseRenderActivity {
             0.5f, 0.5f, -0.5f,  0.0f,0.0f,1.0f,1.0f,
     };
 
+
     final float[] texture = {//个数与上面的vertex一致，不然后面的会黑
             0.0f,0.0f,
             1.0f, 0.0f,
@@ -47,11 +48,13 @@ public class CubeRenderActivity extends BaseRenderActivity {
             0.0f,1.0f,
             1.0f, 1.0f,
     };
+    private final FloatBuffer posFloatBuf = getGLBuffer(position);//java和opengl有大小头区别，记得native order
+    private final FloatBuffer textFloatBuf = getGLBuffer(texture);
+
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         super.onSurfaceCreated(gl10, eglConfig);
-        setVertexShaderRawID(R.raw.cube_vertex_shader);
-        setFragmentShaderRawID(R.raw.cube_fragment_shader);
+        setShaderRawID(R.raw.cube_vertex_shader, R.raw.cube_fragment_shader);
         startTime = System.currentTimeMillis();
     }
 
@@ -60,7 +63,7 @@ public class CubeRenderActivity extends BaseRenderActivity {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT|GLES30.GL_DEPTH_BUFFER_BIT);
         GLES30.glClearColor(0.4f,0.4f,0.4f,1.0f);
         GLES30.glEnable(GLES30.GL_DEPTH_TEST);
-        GLES30.glViewport(0,0,1024,1024);
+        GLES30.glViewport(0,0,1080,1080);
 
         Matrix.setIdentityM(modelMatrix, 0);
 //        Matrix.scaleM(modelMatrix, 0, 0.5f, 0.5f,0.5f);

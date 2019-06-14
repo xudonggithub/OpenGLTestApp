@@ -1,6 +1,7 @@
 package com.cxd.opengl;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -19,7 +20,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener {
     static {
         System.loadLibrary("native-lib");
     }
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void startActivity(){
-        Intent intent=new Intent(this, CubeRenderActivity.class);
+        Intent intent=new Intent(this, LightShadowRenderActivity.class);
         startActivity(intent);
         finish();
     }

@@ -9,6 +9,6 @@ in vec4 v_Color;
 
 out vec4 fragColor;
 void main() {
-    fragColor = v_Color;//vec4(1.0,0,0,1.0);//texture(uTextue, v_Text);//
+    fragColor =texture(uTextue, v_Text);// v_Color;//vec4(1.0,0,0,1.0);//
 //    gl_PointSize = 10.0;
 }
