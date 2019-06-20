@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.opengl.GLES20;
 import android.opengl.GLES30;
+import android.opengl.GLES32;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
@@ -67,7 +68,7 @@ public class BaseRenderActivity extends Activity implements GLSurfaceView.Render
             0.0f,1.0f,
             1.0f, 1.0f,
              };
-    protected int vertexShaderID = 0, fragmentShaderID = 0, program = 0, textureID = 0;
+    protected int vertexShaderID = 0, fragmentShaderID = 0, geogetryShaderID = 0, program = 0, textureID = 0;
     private final FloatBuffer posFloatBuf = getGLBuffer(position);//java和opengl有大小头区别，记得native order
     private final FloatBuffer textFloatBuf = getGLBuffer(texture);
     protected float[] modelMatrix = new float[16];
@@ -76,10 +77,12 @@ public class BaseRenderActivity extends Activity implements GLSurfaceView.Render
     protected long startTime;
     private int vertexShaderRawID = R.raw.base_vertex_shader;
     private int fragmentShaderRawID = R.raw.base_fragment_shader;
+    private int geogetryShaderRawID = 0;
 
-    public void setShaderRawID(int vertexShaderID, int fragmentShaderID){
-        vertexShaderRawID = vertexShaderID;
-        fragmentShaderRawID = fragmentShaderID;
+    public void setShaderRawID(int vertexShaderRawID, int fragmentShaderID, int geogetryShaderRawID){
+        this.vertexShaderRawID = vertexShaderRawID;
+        this.fragmentShaderRawID = fragmentShaderID;
+        this.geogetryShaderRawID = geogetryShaderRawID;
     }
 
     @Override
@@ -101,7 +104,10 @@ public class BaseRenderActivity extends Activity implements GLSurfaceView.Render
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         vertexShaderID = createShader(GLES30.GL_VERTEX_SHADER, vertexShaderRawID);
         fragmentShaderID = createShader(GLES30.GL_FRAGMENT_SHADER, fragmentShaderRawID);
-        program = createProgram(vertexShaderID, fragmentShaderID);
+        if(geogetryShaderRawID > 0){
+            geogetryShaderID = createShader(GLES32.GL_GEOMETRY_SHADER, geogetryShaderRawID);
+        }
+        program = createProgram(vertexShaderID, fragmentShaderID, geogetryShaderID);
 
         Bitmap bitmap = BitmapUtil.decodeResource(this, R.raw.tex_0);
         ByteBuffer byteBuffer = BitmapUtil.getByteBuffer(bitmap);
@@ -211,6 +217,10 @@ private void checkError(String msg){
                     GLES30.glDeleteShader(fragmentShaderID);
                     fragmentShaderID = 0;
                 }
+                if(geogetryShaderID > 0) {
+                    GLES30.glDeleteShader(geogetryShaderID);
+                    geogetryShaderID = 0;
+                }
                 if(program > 0) {
                     GLES30.glDeleteProgram(program);
                     program = 0;
@@ -262,17 +272,19 @@ private void checkError(String msg){
         return shaderID;
     }
 
-    public int createProgram(int vertexShaderID, int fragmentShaderID){
+    public int createProgram(int vertexShaderID, int fragmentShaderID, int geogetryShaderID){
         int program = GLES30.glCreateProgram();
-        GLES30.glAttachShader(program, vertexShaderID);
-        GLES30.glAttachShader(program, fragmentShaderID);
-        GLES30.glLinkProgram(program);
+        GLES32.glAttachShader(program, vertexShaderID);
+        GLES32.glAttachShader(program, fragmentShaderID);
+        if(geogetryShaderID > 0)
+            GLES32.glAttachShader(program, geogetryShaderID);
+        GLES32.glLinkProgram(program);
         int[] linkStatus = new int[1];
-        GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0);
+        GLES32.glGetProgramiv(program, GLES32.GL_LINK_STATUS, linkStatus, 0);
         if (linkStatus[0] != GLES20.GL_TRUE) {
             Log.e(TAG, "Could not link program: ");
             Log.e(TAG, GLES20.glGetProgramInfoLog(program));
-            GLES20.glDeleteProgram(program);
+            GLES32.glDeleteProgram(program);
             program = 0;
         }
         return program;

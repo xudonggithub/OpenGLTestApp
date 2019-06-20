@@ -10,47 +10,49 @@ import java.nio.FloatBuffer;
 
 public class CubeRender extends BaseRender {
     float position[] = {
-            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-            0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+            //back
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f, 1.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f, 1.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f, 1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
 
-            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-            0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-            0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-            0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-            0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-            0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-            0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-            0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-            0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-            0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+            //front
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, 0.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, 0.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f, 0.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
+            //left
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
+            //right
+            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 1.0f, 1.0f,
+            //bottom
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 1.0f,
+            0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, 1.0f,
+            -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+            //top
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+            0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+            -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+            -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
     };
     private final FloatBuffer posFloatBuf = getGLBuffer(position);
 
@@ -60,16 +62,27 @@ public class CubeRender extends BaseRender {
         fragmentShaderID = createShader(context, GLES30.GL_FRAGMENT_SHADER, R.raw.cube_fragment_shader);
         program = createProgram(vertexShaderID, fragmentShaderID);
 
-        Matrix.setIdentityM(modelMatrix, 0);
-        Matrix.scaleM(modelMatrix, 0, 0.5f, 0.5f,0.5f);
-        Matrix.translateM(modelMatrix,0, 2.8f,5.0f,0.0f);
-
-        Matrix.setIdentityM(viewMatrix, 0);
-        Matrix.setLookAtM(viewMatrix,0, -1.7f, -1.7f, 3, 0, 0, 0, 0, 1.0f, 0);
-
-        Matrix.setIdentityM(projectMatrix, 0);
-        Matrix.perspectiveM(projectMatrix, 0, 40f, 1,  1f, 1000f);
+//        Matrix.setIdentityM(modelMatrix, 0);
+//        Matrix.scaleM(modelMatrix, 0, 0.5f, 0.5f,0.5f);
+//        Matrix.translateM(modelMatrix,0, 2.8f,5.0f,0.0f);
+//
+//        Matrix.setIdentityM(viewMatrix, 0);
+//        Matrix.setLookAtM(viewMatrix,0, -1.7f, -1.7f, 3, 0, 0, 0, 0, 1.0f, 0);
+//
+//        Matrix.setIdentityM(projectMatrix, 0);
+//        Matrix.perspectiveM(projectMatrix, 0, 40f, 1,  1f, 1000f);
     }
+
+    public void setMatrixs(float[] modeMatrix, float[] viewMatrix, float[] projectMatrix)
+    {
+        if(modeMatrix != null)
+            System.arraycopy(modeMatrix, 0, this.modelMatrix, 0, 16);
+        if(viewMatrix != null)
+            System.arraycopy(viewMatrix, 0, this.viewMatrix, 0, 16);
+        if(projectMatrix != null)
+            System.arraycopy(projectMatrix, 0, this.projectMatrix, 0, 16);
+    }
+
     public void onDraw(boolean doCleaR)
     {
         if(doCleaR){
@@ -79,17 +92,19 @@ public class CubeRender extends BaseRender {
             GLES30.glViewport(0,0,1080,1080);
         }
 
-
-
         GLES30.glUseProgram(program);
         //position
         GLES30.glEnableVertexAttribArray(0);
-        posFloatBuf.position(0);
-        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 4*6, posFloatBuf);
+        posFloatBuf.position(0);//容易踩的坑，小心
+        GLES30.glVertexAttribPointer(0, 3, GLES30.GL_FLOAT, false, 4*10, posFloatBuf);
         //normal
         GLES30.glEnableVertexAttribArray(1);
-        posFloatBuf.position(3);//容易踩的坑，小心
-        GLES30.glVertexAttribPointer(1, 3, GLES30.GL_FLOAT, false, 4*6, posFloatBuf);
+        posFloatBuf.position(3);
+        GLES30.glVertexAttribPointer(1, 3, GLES30.GL_FLOAT, false, 4*10, posFloatBuf);
+        //color
+        GLES30.glEnableVertexAttribArray(2);
+        posFloatBuf.position(6);
+        GLES30.glVertexAttribPointer(2, 4, GLES30.GL_FLOAT, false, 4*10, posFloatBuf);
 
 
 //        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
@@ -104,6 +119,7 @@ public class CubeRender extends BaseRender {
 
         GLES30.glDisableVertexAttribArray(0);
         GLES30.glDisableVertexAttribArray(1);
+        GLES30.glDisableVertexAttribArray(2);
         GLES30.glUseProgram(0);
     }
     @Override

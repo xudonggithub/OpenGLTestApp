@@ -16,6 +16,8 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class LightShadowRenderActivity extends BaseRenderActivity {
+    final float[] lightPos = {1.8f,1.8f,0.0f,1.0f};
+    final float[] eyePos = {-3.0f, 0.0f, 3.0f, 1.0f};
     final float[] position = {
             //front red
             -0.5f,0.5f,0.5f,    0.8f,0.0f,0.0f,1.0f,  0.0f,0.0f,1.0f,
@@ -42,7 +44,7 @@ public class LightShadowRenderActivity extends BaseRenderActivity {
              10.0f, -0.5f,  10.0f, 1.0f,1.0f,1.0f,1.0f, 0.0f,0.0f,1.0f,
 
             //light
-            2.8f,5.0f,0.0f,1.0f,  1.0f,1.0f,1.0f,1.0f, 0.0f,0.0f,1.0f,
+            lightPos[0],lightPos[1],lightPos[2], 1.0f,1.0f,1.0f,1.0f, 0.0f,0.0f,1.0f,
     };
     private  final float[] texture = {//个数与上面的vertex一致，不然后面的会黑
             0.0f,0.0f,
@@ -60,14 +62,14 @@ public class LightShadowRenderActivity extends BaseRenderActivity {
             0.0f,1.0f,
             1.0f, 1.0f,
     };
-    final float[] lightPos = {2.8f,5.0f,0.0f,1.0f};
+
     private final FloatBuffer posFloatBuf = getGLBuffer(position);//java和opengl有大小头区别，记得native order
     private final FloatBuffer textFloatBuf = getGLBuffer(texture);
     private int depthVertexShaderID = 0, depthFragmentShaderID = 0, depthProgram = 0, depthTextureID = 0;
     private float[] depthPojectMatrix = new float[16];
     private float[] lightViewMatrix = new float[16];
     private boolean bRotating = false;
-    private float rotateDegree = 30;
+    private float rotateDegree = 50f;
     private CubeRender cuberRender = new CubeRender();
 
     @Override
@@ -86,12 +88,12 @@ public class LightShadowRenderActivity extends BaseRenderActivity {
 
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
-        setShaderRawID(R.raw.light_shadow_vertex_shader, R.raw.light_shadow_fragment_shader);
+        setShaderRawID(R.raw.light_shadow_vertex_shader, R.raw.light_shadow_fragment_shader, 0);// R.raw.light_shadow_geometry_shader);
 
         super.onSurfaceCreated(gl10, eglConfig);
         depthVertexShaderID = createShader(GLES30.GL_VERTEX_SHADER, R.raw.depth_texture_vertex_shader);
         depthFragmentShaderID = createShader(GLES30.GL_FRAGMENT_SHADER, R.raw.depth_texture_fragment_shader);
-        depthProgram = createProgram(depthVertexShaderID, depthFragmentShaderID);
+        depthProgram = createProgram(depthVertexShaderID, depthFragmentShaderID, 0);
         depthTextureID = createImageTexture(null, 1024, 1204);
 
         Matrix.setIdentityM(modelMatrix, 0);
@@ -99,7 +101,7 @@ public class LightShadowRenderActivity extends BaseRenderActivity {
         Matrix.rotateM(modelMatrix,0, 30,0,1,0);
 
         Matrix.setIdentityM(viewMatrix, 0);
-        Matrix.setLookAtM(viewMatrix,0, -1.7f, -1.7f, 3, 0, 0, 0, 0, 1.0f, 0);
+        Matrix.setLookAtM(viewMatrix,0, eyePos[0], eyePos[1], eyePos[2], 0, 0, 0, 0, 1.0f, 0);
 
         Matrix.setIdentityM(lightViewMatrix, 0);
         Matrix.setLookAtM(lightViewMatrix,0, lightPos[0], lightPos[1], lightPos[2], 0, 0, 0, 0, 1.0f, 0);
@@ -108,7 +110,13 @@ public class LightShadowRenderActivity extends BaseRenderActivity {
         Matrix.perspectiveM(projectMatrix, 0, 40.0f, 1.0f,  1f, 1000f);
 
         Matrix.setIdentityM(depthPojectMatrix, 0);
+        Matrix.perspectiveM(depthPojectMatrix, 0, 60.0f, 1.0f,  1f, 1000f);
         Matrix.multiplyMM(depthPojectMatrix, 0, fbMatrix,0,projectMatrix,0);
+
+        Matrix.setIdentityM(lightModelMatrix, 0);
+
+        Matrix.translateM(lightModelMatrix,0, lightPos[0],lightPos[1],lightPos[2]);
+        Matrix.scaleM(lightModelMatrix, 0, 0.5f, 0.5f,0.5f);
 
         cuberRender.onCreated(this);
     }
@@ -167,7 +175,7 @@ public class LightShadowRenderActivity extends BaseRenderActivity {
         GLES30.glUniform4f(GLES30.glGetUniformLocation(depthProgram, "lightPos"), lightPos[0],lightPos[1],lightPos[2],lightPos[3]);
 
         Matrix.setIdentityM(modelMatrix, 0);
-        Matrix.rotateM(modelMatrix,0, 30,1,0,0);
+//        Matrix.rotateM(modelMatrix,0, 30,1,0,0);
         if(bRotating)
             rotateDegree =(rotateDegree + 1)%360;
 
@@ -230,7 +238,6 @@ public class LightShadowRenderActivity extends BaseRenderActivity {
         GLES30.glEnableVertexAttribArray(3);
         GLES30.glVertexAttribPointer(3, 3, GLES30.GL_FLOAT, false, 4*10, posFloatBuf);
 
-
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
         GLES30.glUniform1i(GLES30.glGetUniformLocation(program, "uDepTextue"), 0);
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, depthTextureID);
@@ -238,7 +245,7 @@ public class LightShadowRenderActivity extends BaseRenderActivity {
         GLES30.glUniform4f(GLES30.glGetUniformLocation(program, "uLightPos"), lightPos[0],lightPos[1],lightPos[2],lightPos[3]);
         GLES30.glUniformMatrix4fv(GLES30.glGetUniformLocation(program, "uLightViewMatrix"), 1, false, lightViewMatrix, 0);
         GLES30.glUniform2f(GLES30.glGetUniformLocation(program, "uDepTextueSize"), 1024,1024);
-        GLES30.glUniform4f(GLES30.glGetUniformLocation(program, "uEyePos"), -1.7f, -1.7f, 3.0f, 1.0f);
+        GLES30.glUniform4f(GLES30.glGetUniformLocation(program, "uEyePos"), eyePos[0], eyePos[1], eyePos[2], eyePos[3]);
 
         GLES30.glUniformMatrix4fv(GLES30.glGetUniformLocation(program, "modelMatrix"), 1, false, modelMatrix, 0);
         GLES30.glUniformMatrix4fv(GLES30.glGetUniformLocation(program, "projectMatrix"), 1, false, projectMatrix,0);
@@ -256,8 +263,12 @@ public class LightShadowRenderActivity extends BaseRenderActivity {
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0);
         GLES30.glUseProgram(0);
 
+        //画光源
+
+        cuberRender.setMatrixs(lightModelMatrix, viewMatrix, projectMatrix);
         cuberRender.onDraw(false);
 
     }
 
+    private float[] lightModelMatrix = new float[16];
 }

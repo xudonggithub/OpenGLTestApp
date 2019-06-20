@@ -54,7 +54,7 @@ public class CubeRenderActivity extends BaseRenderActivity {
     @Override
     public void onSurfaceCreated(GL10 gl10, EGLConfig eglConfig) {
         super.onSurfaceCreated(gl10, eglConfig);
-        setShaderRawID(R.raw.cube_vertex_shader, R.raw.cube_fragment_shader);
+        setShaderRawID(R.raw.cube_vertex_shader, R.raw.cube_fragment_shader, 0);
         startTime = System.currentTimeMillis();
     }
 

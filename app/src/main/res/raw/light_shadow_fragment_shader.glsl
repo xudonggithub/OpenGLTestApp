@@ -1,5 +1,4 @@
-//#version 120
-#version 300 es
+#version 320 es
 precision highp float;
 
 //uniform vec2 test;
@@ -24,11 +23,6 @@ void calPointLight(in vec4 pos, in vec3 normal,in vec4 lightPos, in vec4 eyePos,
     vec3 E = normalize(eyePos.xyz - pos.xyz);
     vec3 H = normalize(L+E);
 
-//    float DLN = dot(L,N);
-//    if(DLN < 0.0)
-//        diffuse = vec4(1.0, 1.0, 0.0,0.0);
-//    else
-//        diffuse = vec4(DLN, DLN, DLN, 1.0);//max(0.0, dot(L, N)) * diffuse;
     diffuse = max(0.0, dot(L, N)) * diffuse;
     specular = pow(max(0.0, dot(N, H)),shininess) * specular;
 }
@@ -45,19 +39,21 @@ void main() {
         vec4 depth = texture(uDepTextue, st);
         float depthDist = depth.r * 256.0 * 256.0 + depth.g * 256.0 + depth.b + depth.a/32.0;
         float srcDist = distance(uLightPos.xyz, v_Pos.xyz);
-//        if(srcDist>depthDist)
-//            fragColor =vec4(0.57,0.57,0.57,0.9);//v_Color;//vec4(1.0,0,0,1.0);//texture(uTextue, v_Text);//
-//        else {
-            vec4 ambient = vec4(0.0, 0.0,0.0,0.0);
+        if(srcDist-0.4>depthDist)
+            fragColor =mix(v_Color,vec4(0.57,0.57,0.57,1.0), 0.5);//v_Color;//vec4(1.0,0,0,1.0);//texture(uTextue, v_Text);//
+        else {
+            vec4 ambient =  v_Color;//vec4(0.0, 0.0, 1.0, 0.0);//
             vec4 diffuse = vec4(0.9, 0.9, 0.0, 1.0);
-            vec4 specular = vec4(0.6, 0.6,0.0, 1.0);
-            calPointLight(v_Pos, v_Normal, uLightPos, uEyePos, 12.0, ambient,diffuse,specular);
+            vec4 specular = vec4(0.9, 0.9,0.0, 1.0);
+            calPointLight(v_Pos, v_Normal, uLightPos, uEyePos, 32.0, ambient,diffuse,specular);
 
-            float r = min(diffuse.r, 1.0);
-            float g = min(diffuse.g, 1.0);
-            float b = min(diffuse.b, 1.0);
-            fragColor = vec4(r, g, b, 1.0);
-//        }
+            float r = clamp(ambient.r+diffuse.r+specular.r, 0.0, 1.0);
+            float g = clamp(ambient.g+diffuse.g+specular.g, 0.0, 1.0);
+            float b = clamp(ambient.b+diffuse.b+specular.b, 0.0, 1.0);
+            float a = clamp(ambient.a+diffuse.a+specular.a, 0.0, 1.0);
+            fragColor = vec4(r, g, b, a);
+
+        }
 //        float zsbfDep = floor(floor(depthDist) / 256.0);
 //        float xsbfDep = mod(floor(depthDist), 256.0);
 //        float zsbfSrc = floor(floor(srcDist) / 256.0);
